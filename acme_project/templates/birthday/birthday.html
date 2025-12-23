@@ -15,7 +15,7 @@
         Калькулятор ожидания дня рождения
       </div>
       <div class="card-body">
-          <form method="post">
+          <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
             {% if '/delete/' in request.path %}
               <p>{{ data.first_name }} {{data.last_name}}</p>
