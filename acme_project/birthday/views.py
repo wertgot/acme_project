@@ -36,7 +36,7 @@ def get_birthday_for_year(birthday, year):
 
 
 def birthday(request):
-    form = BirthdayForm(request.GET or None)
+    form = BirthdayForm(request.POST or None)
     context = {'form': form}
     if form.is_valid():
         birthday_countdown = calculate_birthday_countdown(
