@@ -4,7 +4,8 @@ from django.views.generic import (
 from django.urls import reverse_lazy
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.http import HttpResponseForbidden
 
 from .forms import BirthdayForm, CongratulationForm
 from .models import Birthday
@@ -31,12 +32,23 @@ class BirthdayCreateView(LoginRequiredMixin, CreateView):
         return super().form_valid(form)
 
 
-class BirthdayUpdateView(UpdateView):
+
+class EditMixin(LoginRequiredMixin, UserPassesTestMixin):
+    def test_func(self):
+        """Проверяем, что пользователь является автором записи"""
+        birthday = self.get_object()
+        return self.request.user == birthday.author
+
+    def handle_no_permission(self):
+        return HttpResponseForbidden("Вы не можете редактировать эту запись")
+
+
+class BirthdayUpdateView(EditMixin, UpdateView):
     model = Birthday
     form_class = BirthdayForm
 
 
-class BirthdayDeleteView(DeleteView):
+class BirthdayDeleteView(EditMixin, DeleteView):
     model = Birthday
     success_url = reverse_lazy('birthday:list')
 
