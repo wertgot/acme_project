@@ -7,6 +7,12 @@ from .validators import real_age
 
 User = get_user_model()
 
+class Tag(models.Model):
+    tag = models.CharField('Тег', max_length=20)
+
+    def __str__(self):
+        return self.tag
+
 class Birthday(models.Model):
     first_name = models.CharField('Имя', max_length=20)
     last_name = models.CharField(
@@ -19,6 +25,20 @@ class Birthday(models.Model):
         validators=(real_age,)
     )
     image = models.ImageField('Фото', upload_to='birthdays_images', blank=True)
+    tags = models.ManyToManyField(
+        Tag,
+        verbose_name='Теги',
+        blank=True,
+        help_text='Удерживайте Ctrl для выбора нескольких вариантов'
+    )
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        verbose_name='Автор',
+        related_name='birthdays',
+        null=True,
+        blank=True
+    )
 
     class Meta:
         constraints = (

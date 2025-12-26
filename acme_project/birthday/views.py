@@ -4,9 +4,10 @@ from django.views.generic import (
 from django.urls import reverse_lazy
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 from .forms import BirthdayForm, CongratulationForm
-from .models import Birthday, Congratulation
+from .models import Birthday
 from .utils import calculate_birthday_countdown
 
 
@@ -16,9 +17,18 @@ class BirthdayListView(ListView):
     paginate_by = 5
 
 
-class BirthdayCreateView(CreateView):
+class BirthdayCreateView(LoginRequiredMixin, CreateView):
     model = Birthday
     form_class = BirthdayForm
+
+    def form_valid(self, form):
+        """Устанавливаем автора перед сохранением"""
+        self.object = form.save(commit=False)
+        self.object.author = self.request.user
+        self.object.save()
+        form.save_m2m()
+
+        return super().form_valid(form)
 
 
 class BirthdayUpdateView(UpdateView):
